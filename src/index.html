@@ -1,0 +1,18 @@
+<html>
+<head>
+  <script type="application/javascript" src="jspm_packages/system.js"></script>
+  <script type="application/javascript" src="../org.eclipse.paho.mqtt.javascript/src/mqttws31.js"></script>
+  <script type="application/javascript" src="config.js"></script>
+  <!--<script type="application/javascript" src="beer-duke.js"></script>-->
+  <script type="application/javascript">
+    Promise.all([
+      System.import('angular'),
+      System.import('beer-duke')])
+        .then(function (modules) {
+          modules[0].bootstrap(document, ['BeerDuke']);
+        });
+  </script>
+</head>
+<body>
+</body>
+</html>
