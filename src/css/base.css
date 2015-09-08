@@ -36,3 +36,26 @@ html {
 	text-transform: uppercase;
 	font-weight: bold;
 }
+
+
+.form-element {
+	font-size: 18px;
+	padding: 10px 0;
+	text-align: center;
+}
+.form-element input {
+	width: 100%;
+	font-size: 20px;
+	padding: 10px;
+}
+.login-header {
+	font-size: 30px;
+	text-align: center;
+	padding: 0 0 20px 0;
+}
+.separator {
+	width: 30%;
+	margin: 15px auto;
+	height: 2px;
+	background: #555;
+}

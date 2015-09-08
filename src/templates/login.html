@@ -1,9 +1,22 @@
 <div ng-form="form">
+	<img class="header" src="img/beer3.png">
+
+	<div class="login-header">
+		Log in to get your beer fix!
+	</div>
+
+	<div class="separator"></div>
 
   <label>
-    Email from JavaZone ticket:
-    <input type="email" ng-model="ctrl.email" required>
-    <input type="submit" ng-click="ctrl.logIn()" ng-disabled="form.$invalid" value="Connect">
+    <div class="form-element">
+	Email from JavaZone ticket:
+    </div>
+    <div class="form-element">
+	<input type="email" ng-model="ctrl.email" placeholder="email…" required>
+    </div>
+    <div class="form-element">
+	<input type="submit" ng-click="ctrl.logIn()" ng-disabled="form.$invalid" value="Connect">
+    </div>
   </label>
 
 </div>
