@@ -38,11 +38,11 @@ html {
 }
 
 .code-no {
-	background: rgb(159, 7 55);
+	background: rgba(159, 7 55, 1) !important;
 }
 
 .code-yes {
-	background: rgb(43, 106, 101);
+	background: rgba(43, 106, 101, 1) !important;
 }
 
 
