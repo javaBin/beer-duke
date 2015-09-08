@@ -1,18 +1,18 @@
 <html>
 <head>
-  <script type="application/javascript" src="jspm_packages/system.js"></script>
+  <script type="application/javascript" src="jspm_packages/system.src.js"></script>
   <script type="application/javascript" src="../org.eclipse.paho.mqtt.javascript/src/mqttws31.js"></script>
   <script type="application/javascript" src="config.js"></script>
-  <!--<script type="application/javascript" src="beer-duke.js"></script>-->
-  <script type="application/javascript">
+  <script type="text/ecmascript">
     Promise.all([
       System.import('angular'),
-      System.import('beer-duke')])
+      System.import('BeerDukeTap')])
         .then(function (modules) {
-          modules[0].bootstrap(document, ['BeerDuke']);
+          modules[0].bootstrap(document, ['BeerDukeTap']);
         });
   </script>
 </head>
 <body>
+<div ng-view></div>
 </body>
 </html>

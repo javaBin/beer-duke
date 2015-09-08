@@ -1,6 +1,6 @@
 System.config({
   defaultJSExtensions: true,
-  transpiler: "babel",
+  transpiler: "traceur",
   babelOptions: {
     "optional": [
       "runtime",
@@ -13,13 +13,14 @@ System.config({
   },
 
   map: {
-    "angular": "github:angular/bower-angular@1.4.4",
-    "babel": "npm:babel-core@5.8.22",
-    "babel-runtime": "npm:babel-runtime@5.8.20",
+    "angular": "npm:angular@1.4.5",
+    "angular-route": "npm:angular-route@1.4.5",
     "core-js": "npm:core-js@1.1.1",
     "jasmine-node": "npm:jasmine-node@1.14.5",
     "mhevery/jasmine-node": "github:mhevery/jasmine-node@1.14.5",
     "mqtt_over_websockets": "npm:mqtt_over_websockets@0.0.1-b",
+    "traceur": "github:jmcriffey/bower-traceur@0.0.91",
+    "traceur-runtime": "github:jmcriffey/bower-traceur-runtime@0.0.91",
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.3.0"
     },
@@ -67,6 +68,9 @@ System.config({
     "github:jspm/nodelibs-vm@0.1.0": {
       "vm-browserify": "npm:vm-browserify@0.0.4"
     },
+    "npm:angular@1.4.5": {
+      "process": "github:jspm/nodelibs-process@0.1.1"
+    },
     "npm:asn1.js@2.2.0": {
       "assert": "github:jspm/nodelibs-assert@0.1.0",
       "bn.js": "npm:bn.js@2.2.0",
@@ -77,9 +81,6 @@ System.config({
     },
     "npm:assert@1.3.0": {
       "util": "npm:util@0.10.3"
-    },
-    "npm:babel-runtime@5.8.20": {
-      "process": "github:jspm/nodelibs-process@0.1.1"
     },
     "npm:browserify-aes@1.0.3": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
