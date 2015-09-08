@@ -1,26 +1,33 @@
 (function () {
   'use strict';
 
-  function BeerDukeControllerController($log, BeerDukeService, BeerDukeSettings) {
+  function BeerDukeControllerController($log, $location, BeerDukeService, BeerDukeSettings) {
     var ctrl = this;
+
+    console.log('ctrl: BeerDukeSettings.values.clientId =', BeerDukeSettings.values.clientId);
+    if(!BeerDukeSettings.values.clientId) {
+      $location.path('/login');
+    }
 
     ctrl.slots = {};
 
     BeerDukeService.callbacks.onConnect = function () {
-      BeerDukeService.subscribe('/beer-duke/slot/#');
+      BeerDukeService.subscribe(BeerDukeSettings.values.tap + '/slots');
     };
     BeerDukeService.callbacks.onMessageArrived = function (m) {
       $log.info('m.payloadString =', m.payloadString);
 
-      var slotNo = m.destinationName.match(/^\/beer-duke\/slot\/([0-9]+)$/);
-
-      if (slotNo && slotNo.length == 2) {
+      if (m.destinationName == BeerDukeSettings.values.tap + '/slots') {
         try {
-          $log.info('slot', slotNo[1]);
-          var slot = parseInt(slotNo[1]);
-          var count = parseInt(m.payloadString);
-          $log.info('slot ' + slot + ' = ' + count);
-          ctrl.slots[slot] = count;
+          var slotCounts = angular.fromJson(m.payloadString);
+          if(_.isArray(slotCounts)) {
+            _.forEach(ctrl.slots, function(key) {
+              delete ctrl.slots[key];
+            });
+            _.forEach(slotCounts, function(count, index) {
+              ctrl.slots[index] = count;
+            });
+          }
         } catch (e) {
           $log.warn(e);
         }
@@ -33,16 +40,30 @@
     }
 
     ctrl.requestBeer = function () {
-      var payload = {
-        code: this.code,
-        email: this.email
-      };
-      $log.info('payload', payload);
+      var code = this.code;
+      $log.info('requesting beer, code=' + code);
+      BeerDukeService.requestBeer(code);
+    };
 
-      BeerDukeService.submit('/beer-duke/give-beer', payload);
+    ctrl.logOut = function () {
+      console.log('BeerDukeSettings.values.clientId =', BeerDukeSettings.values.clientId);
+      delete BeerDukeSettings.values.clientId;
+      BeerDukeSettings.save();
+      console.log('BeerDukeSettings.values.clientId =', BeerDukeSettings.values.clientId);
+      $location.path('/login').replace();
     };
 
     BeerDukeService.connect('controller');
+  }
+
+  function LoginController($location, BeerDukeSettings) {
+    var ctrl = this;
+
+    ctrl.logIn = function () {
+      BeerDukeSettings.values.clientId = ctrl.email;
+      BeerDukeSettings.save();
+      $location.path('/');
+    }
   }
 
   function run(BeerDukeService) {
@@ -54,6 +75,11 @@
         controller: BeerDukeControllerController,
         controllerAs: 'ctrl',
         templateUrl: 'templates/controller.html'
+      })
+      .when('/login', {
+        controller: LoginController,
+        controllerAs: 'ctrl',
+        templateUrl: 'templates/login.html'
       });
   }
 

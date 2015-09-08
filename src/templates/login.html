@@ -1,0 +1,9 @@
+<div ng-form="form">
+
+  <label>
+    Email from JavaZone ticket:
+    <input type="email" ng-model="ctrl.email" required>
+    <input type="submit" ng-click="ctrl.logIn()" ng-disabled="form.$invalid" value="Connect">
+  </label>
+
+</div>

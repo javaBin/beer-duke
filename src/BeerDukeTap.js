@@ -1,8 +1,12 @@
 (function () {
   'use strict';
 
-  function BeerDukeTapController($log, $timeout, BeerDukeService, TsService) {
+  function BeerDukeTapController($log, $timeout, BeerDukeService, BeerDukeSettings, TsService) {
     var ctrl = this;
+
+    if(!BeerDukeSettings.values.clientId) {
+      BeerDukeSettings.setRandomClientId();
+    }
 
     var messages = ctrl.messages = [];
     ctrl.count = 0;
@@ -17,7 +21,7 @@
     }
 
     BeerDukeService.callbacks.onConnect = function () {
-      BeerDukeService.subscribe('/beer-duke/give-beer');
+      BeerDukeService.subscribe(BeerDukeSettings.values.tap + '/give-beer');
     };
     BeerDukeService.callbacks.onMessageArrived = function (m) {
       $log.info('m.payloadString =', m.payloadString);
@@ -32,7 +36,7 @@
         return;
       }
 
-      if (m.destinationName == '/beer-duke/give-beer') {
+      if (m.destinationName == BeerDukeSettings.values.tap + '/give-beer') {
         var code = payload.code;
         var email = payload.email;
 
@@ -41,15 +45,17 @@
           return;
         }
 
-        TsService.giveBeer().then(function(counts) {
-          _.forEach(counts, function(count, index) {
-            BeerDukeService.updateSlots(index, count);
-          });
-        });
-
-        ctrl.message = payload;
+        onGiveBeerRequest(email, code);
       }
     };
+
+    function onGiveBeerRequest(email, code) {
+      TsService.giveBeer().then(function(counts) {
+        BeerDukeService.updateSlots(counts);
+      });
+
+      //ctrl.message = code;
+    }
 
     BeerDukeService.connect('tap');
   }

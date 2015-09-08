@@ -36,12 +36,18 @@
       values = angular.fromJson(window.localStorage['beer-duke'] || '{}');
     }
 
+    function setRandomClientId() {
+      values.clientId = values.clientId || 'beer-duke-' + Math.round(Math.random() * 100000);
+      save();
+    }
+
     load();
-    values.clientId = values.clientId || 'beer-duke-' + Math.round(Math.random() * 100000);
     values.showSettings = values.showSettings || false;
+    values.tap = values.tap || '/beer-duke';
     save();
 
     return {
+      setRandomClientId: setRandomClientId,
       keys: keys,
       values: values,
       load: load,
@@ -81,6 +87,7 @@
       self.client = client;
 
       self.client.connect({
+        cleanSession: true,
         onSuccess: function () {
           problems.connect_response = arguments;
           var args = arguments;
@@ -138,36 +145,53 @@
       }
     }
 
-    function submit(destination, payload) {
+    function requestBeer(code) {
+      var payload = {code: code, email: BeerDukeSettings.values.clientId};
+      console.log('payload =', payload);
       var message = new Paho.MQTT.Message(angular.toJson(payload));
-      message.destinationName = destination;
+      message.destinationName = BeerDukeSettings.values.tap + '/give-beer';
+      message.qos = 1;
+      message.retained = false;
       self.client.send(message);
     }
 
-    function updateSlots(slot, count) {
-      var message = new Paho.MQTT.Message('' + count);
-      message.destinationName = '/beer-duke/slot/' + slot;
+    function updateSlots(counts) {
+      var message = new Paho.MQTT.Message(angular.toJson(counts));
+      message.destinationName = BeerDukeSettings.values.tap + '/slots';
+      message.qos = 0;
+      message.retained = true;
       self.client.send(message);
     }
 
     return {
       messages: messages,
-      submit: submit,
       connect: connect,
       subscribe: subscribe,
       connected: connected,
       callbacks: callbacks,
       updateSlots: updateSlots,
+      requestBeer: requestBeer,
       problems: problems
     }
   }
 
-  function TsService($log, $http, BeerDukeSettings) {
+  function TsService($q, $log, $http, BeerDukeSettings) {
     var url = BeerDukeSettings.values.tsUrl;
 
     function giveBeer() {
       if (!url) {
-        return;
+        return $q.resolve([
+          Math.round(Math.random() * 100),
+          Math.round(Math.random() * 100),
+          Math.round(Math.random() * 100),
+          Math.round(Math.random() * 100),
+          Math.round(Math.random() * 100),
+          Math.round(Math.random() * 100),
+          Math.round(Math.random() * 100),
+          Math.round(Math.random() * 100),
+          Math.round(Math.random() * 100),
+          Math.round(Math.random() * 100)
+        ]);
       }
       return $http.get(url + '/GiveBeer').then(function (res) {
         $log.info('beer dispensed!', res);
