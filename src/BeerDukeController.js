@@ -5,6 +5,11 @@ import './BeerDuke.js';
 class BeerDukeControllerController {
   constructor(BeerDukeService) {
     this.BeerDukeService = BeerDukeService;
+
+    this.BeerDukeService.connect('controller', {
+      onConnect: this.onConnect,
+      onMessageArrived: this.onMessageArrived
+    });
   }
 
   requestBeer() {
@@ -13,10 +18,18 @@ class BeerDukeControllerController {
     console.log('code', code);
     this.BeerDukeService.requestBeer(code);
   }
+
+  onConnect() {
+    console.log('onConnect');
+  }
+
+  onMessageArrived(msg) {
+    console.log('msg =', msg);
+  }
 }
 
 function run(BeerDukeService) {
-  BeerDukeService.connect('controller');
+  //BeerDukeService.connect('controller');
 }
 
 function config($routeProvider) {
