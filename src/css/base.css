@@ -1,5 +1,9 @@
 html {
 	padding: 50px;
+	font-family: 'Source Sans Pro', sans-serif;
+	font-weight: 300;
+	color: #ddd;
+	background: #333636;
 }
 
 .wrapper {
@@ -22,7 +26,8 @@ html {
 	margin: 0 auto;
 	font-size: 60px;
 	text-align: center;
-	background: #bbb;
+	background: #f7b000;
+	color: #fff;
 	border-radius: 200px;
 	padding: 10px 20px;
 }
