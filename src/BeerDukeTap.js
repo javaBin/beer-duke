@@ -13,19 +13,20 @@
     var messages = ctrl.messages = [];
     ctrl.count = 0;
     ctrl.code = '';
-    ctrl.codes = [];
+    var codes = [];
 
-    function randomDigit() {
-      return '' + (Math.round(Math.random() * 9) + 1);
-    }
-
-    function rotateCode() {
-      var c = randomDigit() + randomDigit() + randomDigit() + randomDigit() + randomDigit();
+    function rotateCode(clearCodes) {
+      if (clearCodes) {
+        codes = [];
+      }
+      var c = Math.round(Math.random() * 89999 + 10000);
       ctrl.code = c;
-      ctrl.codes.push(c);
-      ctrl.codes = ctrl.codes.slice(1);
+      codes.push(c);
+      if (codes.length > 2) {
+        codes = codes.slice(1);
+      }
       $timeout(function () {
-        rotateCode();
+        rotateCode(false);
       }, 60 * 1000);
     }
 
@@ -59,23 +60,31 @@
     };
 
     function onGiveBeerRequest(email, code) {
-      TsService.giveBeer().then(function (counts) {
-        BeerDukeService.updateSlots(counts);
-      });
-
       var hero = _.find(heros, {email: email});
 
-      if (hero) {
+      var validCode = _.indexOf(codes, code) >= 0;
+
+      ctrl.zero = undefined;
+      ctrl.hero = undefined;
+      ctrl.badCode = undefined;
+
+      if (hero && validCode) {
         ctrl.hero = hero;
+        TsService.giveBeer().then(function (counts) {
+          BeerDukeService.updateSlots(counts);
+        });
+      } else if (hero && !validCode) {
+        ctrl.hero = hero;
+        ctrl.badCode = true;
       } else {
         ctrl.zero = email;
       }
 
-      rotateCode();
+      rotateCode(true);
     }
 
     BeerDukeService.connect('tap');
-    rotateCode();
+    rotateCode(false);
     $http.get('sdkfjsdkljlsdkjg.json').then(function (res) {
       heros = res.data;
     })

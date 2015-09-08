@@ -14,9 +14,14 @@
 		<span>The secret code</span>
 	  </div>
 
-	  <div class="code code-yes" ng-show="ctrl.hero">
+	  <div class="code code-yes" ng-show="ctrl.hero && !ctrl.badCode">
   		{{ctrl.hero.name}}<br>
   		<span>Got the previous beer<br>A real javaBin HERO!</span>
+	  </div>
+
+	  <div class="code code-no" ng-show="ctrl.badCode">
+      {{ctrl.hero.name || ctrl.zero}}<br>
+  		<span>…can't a valid code, n00b!</span>
 	  </div>
 
 	  <div class="code code-no" ng-show="ctrl.zero">

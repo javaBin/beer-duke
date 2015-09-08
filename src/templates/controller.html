@@ -1,4 +1,4 @@
-<div>
+<div ng-form="form">
   <img class="header" src="img/beer3.png">
 
   <div>
@@ -7,11 +7,11 @@
 	Enter the current secret code
 	</div>
 	<div class="form-element">
-	  <input type="number" placeholder="Secret…" ng-model="ctrl.code">
+	  <input type="number" placeholder="Secret…" ng-model="ctrl.code" min="10000" max="99999" required>
 	</div>
     </label>
     <div class="form-element">
-      <button ng-click="ctrl.requestBeer()">Request Beer!</button>
+      <button ng-disabled="form.$invalid" ng-click="ctrl.requestBeer()">Request Beer!</button>
     </div>
   </div>
 
@@ -33,8 +33,6 @@
   </div>
 
   <div class="separator"></div>
-
-  problems: {{mqtt.problems|json}}
 
   <ng-include src="'templates/footer.html'"/>
 </div>
