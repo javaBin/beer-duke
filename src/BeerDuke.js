@@ -54,14 +54,18 @@
     var connected_ = false;
     var messages = [];
     var callbacks = {};
+    var problems = {};
 
     function connect(type) {
       var clientId = BeerDukeSettings.values.clientId + "-" + type;
       var client = new Paho.MQTT.Client("wss://trygvis.io:9001/", clientId);
-      client.onConnectionLost = function (a) {
+      client.onConnectionLost = function () {
+        console.log('onConnectionLost =', arguments);
+        problems.wat = 'hei';
+        var args = arguments;
         $timeout(function () {
           $rootScope.$apply(function () {
-            onConnectionLost(a);
+            onConnectionLost.apply(self, args);
           })
         });
       };
@@ -78,6 +82,7 @@
 
       self.client.connect({
         onSuccess: function () {
+          problems.connect_response = arguments;
           var args = arguments;
           $timeout(function () {
             $rootScope.$apply(function () {
@@ -89,19 +94,20 @@
     }
 
     function subscribe(name) {
+      $log.info('subscribing to ' + name);
       return self.client.subscribe(name);
     }
 
     function connected() {
-      return self.connected_;
+      return connected_;
     }
 
     function onConnect() {
-      $log.info('Connected');
+      $log.info('Connected', arguments);
 
-      self.connected_ = true;
+      connected_ = true;
 
-      invoke('onConnect');
+      invoke('onConnect', arguments);
     }
 
     function invoke(name, args) {
@@ -117,11 +123,9 @@
     }
 
     function onConnectionLost(responseObject) {
-      self.connected_ = false;
+      connected_ = false;
 
-      //if (responseObject.errorCode !== 0)
-      $log.warn("onConnectionLost:", responseObject);
-      $log.warn("onConnectionLost:", responseObject.errorMessage);
+      problems.connectionLost = responseObject;
     }
 
     function onMessageArrived(message) {
@@ -140,13 +144,21 @@
       self.client.send(message);
     }
 
+    function updateSlots(slot, count) {
+      var message = new Paho.MQTT.Message('' + count);
+      message.destinationName = '/beer-duke/slot/' + slot;
+      self.client.send(message);
+    }
+
     return {
       messages: messages,
       submit: submit,
       connect: connect,
       subscribe: subscribe,
       connected: connected,
-      callbacks: callbacks
+      callbacks: callbacks,
+      updateSlots: updateSlots,
+      problems: problems
     }
   }
 
@@ -157,8 +169,9 @@
       if (!url) {
         return;
       }
-      $http.get(url + '/GiveBeer').then(function () {
-        $log.info('beer dispensed!')
+      return $http.get(url + '/GiveBeer').then(function (res) {
+        $log.info('beer dispensed!', res);
+        return res.data;
       });
     }
 
@@ -182,7 +195,8 @@
   function run($rootScope, BeerDukeSettings, BeerDukeService) {
     $rootScope.settings = BeerDukeSettings.values;
     $rootScope.mqtt = {
-      connected: BeerDukeService.connected
+      connected: BeerDukeService.connected,
+      problems: BeerDukeService.problems
     }
   }
 

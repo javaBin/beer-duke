@@ -41,7 +41,11 @@
           return;
         }
 
-        TsService.giveBeer();
+        TsService.giveBeer().then(function(counts) {
+          _.forEach(counts, function(count, index) {
+            BeerDukeService.updateSlots(index, count);
+          });
+        });
 
         ctrl.message = payload;
       }

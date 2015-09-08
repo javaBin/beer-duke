@@ -11,5 +11,16 @@
     <button ng-click="ctrl.requestBeer()">Request Beer!</button>
   </div>
 
+  connected: {{mqtt.connected()}}
+
+  <div ng-if="true || ctrl.slots.length > 0">
+    Beers dispensed:
+    <div ng-repeat="(slot, count) in ctrl.slots">
+        #{{slot}} = {{count}}
+    </div>
+  </div>
+
+  problems: {{mqtt.problems|json}}
+
   <ng-include src="'templates/footer.html'"/>
 </div>
