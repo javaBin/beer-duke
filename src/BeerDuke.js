@@ -4,60 +4,46 @@
   function SettingsController($log, $location, BeerDukeSettings) {
     var ctrl = this;
 
-    ctrl.clientId = BeerDukeSettings.clientId();
-    ctrl.showSettings = BeerDukeSettings.showSettings();
+    ctrl.settings = BeerDukeSettings.values;
 
     ctrl.save = function () {
-      BeerDukeSettings.clientId(ctrl.clientId);
-      BeerDukeSettings.showSettings(ctrl.showSettings);
       BeerDukeSettings.save();
-
       $location.path('/')
     }
   }
 
   function BeerDukeSettings() {
 
+    var keys = [
+      'clientId',
+      'showSettings',
+      'tsUrl'
+    ];
+
+    var values = {};
+
     function save() {
-      store('clientId', clientId_);
-      store('showSettings', showSettings_);
+      _.forEach(keys, function (key) {
+        store('key', values[key]);
+      });
     }
 
-    function store(key, value) {
-      window.localStorage[key] = angular.toJson(value);
-      return value;
+    function store() {
+      window.localStorage['beer-duke'] = angular.toJson(values);
     }
 
-    function load(key) {
-      var x = window.localStorage[key];
-      if (typeof x === 'undefined') {
-        return x;
-      }
-
-      return angular.fromJson(x);
+    function load() {
+      values = angular.fromJson(window.localStorage['beer-duke'] || '{}');
     }
 
-    var clientId_ = load('clientId') || 'beer-duke-' + Math.round(Math.random() * 100000);
-    var showSettings_ = load('showSettings') || false;
+    load();
+    values.clientId = values.clientId || 'beer-duke-' + Math.round(Math.random() * 100000);
+    values.showSettings = values.showSettings || false;
     save();
 
-    function clientId(x) {
-      if (x) {
-        clientId_ = x;
-      }
-      return clientId_;
-    }
-
-    function showSettings(x) {
-      if (x) {
-        showSettings_ = x;
-      }
-      return showSettings_;
-    }
-
     return {
-      clientId: clientId,
-      showSettings: showSettings,
+      keys: keys,
+      values: values,
       load: load,
       save: save
     }
@@ -70,7 +56,7 @@
     var callbacks = {};
 
     function connect(type) {
-      var clientId = BeerDukeSettings.clientId() + "-" + type;
+      var clientId = BeerDukeSettings.values.clientId + "-" + type;
       var client = new Paho.MQTT.Client("wss://trygvis.io:9001/", clientId);
       client.onConnectionLost = function (a) {
         $timeout(function () {
@@ -164,6 +150,23 @@
     }
   }
 
+  function TsService($log, $http, BeerDukeSettings) {
+    var url = BeerDukeSettings.values.tsUrl;
+
+    function giveBeer() {
+      if (!url) {
+        return;
+      }
+      $http.get(url + '/GiveBeer').then(function () {
+        $log.info('beer dispensed!')
+      });
+    }
+
+    return {
+      giveBeer: giveBeer
+    }
+  }
+
   function config($routeProvider) {
     $routeProvider
       .when('/settings', {
@@ -177,7 +180,7 @@
   }
 
   function run($rootScope, BeerDukeSettings, BeerDukeService) {
-    $rootScope.settings = BeerDukeSettings;
+    $rootScope.settings = BeerDukeSettings.values;
     $rootScope.mqtt = {
       connected: BeerDukeService.connected
     }
@@ -185,6 +188,7 @@
 
   angular.module('BeerDuke', ['ngRoute'])
     .factory('BeerDukeService', BeerDukeService)
+    .factory('TsService', TsService)
     .factory('BeerDukeSettings', BeerDukeSettings)
     .config(config)
     .run(run);

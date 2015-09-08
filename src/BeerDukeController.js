@@ -4,7 +4,7 @@
   function BeerDukeControllerController($log, BeerDukeService, BeerDukeSettings) {
     var ctrl = this;
 
-    if (BeerDukeSettings.showSettings()) {
+    if (BeerDukeSettings.values.showSettings) {
       ctrl.code = 123;
       ctrl.email = 'foo@example.org';
     }
@@ -16,7 +16,7 @@
       };
       $log.info('payload', payload);
 
-      BeerDukeService.submit('/beer-duke', payload);
+      BeerDukeService.submit('/beer-duke/give-beer', payload);
     };
 
     BeerDukeService.callbacks.onMessageArrived = function (m) {

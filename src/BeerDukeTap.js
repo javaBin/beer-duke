@@ -1,36 +1,50 @@
 (function () {
   'use strict';
 
-  function BeerDukeTapController($log, $timeout, BeerDukeService) {
+  function BeerDukeTapController($log, $timeout, BeerDukeService, TsService) {
     var ctrl = this;
 
+    var messages = ctrl.messages = [];
+    ctrl.count = 0;
+    ctrl.code = '';
     rotateCode();
-    self.count = 0;
-    self.code = '';
 
     function rotateCode() {
-      self.code = '' + self.count++;
+      ctrl.code = '' + ctrl.count++;
       $timeout(function () {
         rotateCode();
       }, 1000);
     }
 
     BeerDukeService.callbacks.onConnect = function () {
-      BeerDukeService.subscribe('/beer-duke');
+      BeerDukeService.subscribe('/beer-duke/give-beer');
     };
     BeerDukeService.callbacks.onMessageArrived = function (m) {
       $log.info('m.payloadString =', m.payloadString);
-      var payload = angular.fromJson(m.payloadString);
 
-      var code = payload.code;
-      var email = payload.email;
-
-      if (typeof code !== 'string' && typeof email !== 'string') {
-        $log.warn('bad payload', payload.code);
+      var payload;
+      try {
+        payload = angular.fromJson(m.payloadString);
+        messages.unshift(payload);
+      } catch (e) {
+        $log.warn('could not parse json payload', e);
+        $log.warn('JSON:', payloadString);
         return;
       }
 
-      ctrl.message = payload;
+      if (m.destinationName == '/beer-duke/give-beer') {
+        var code = payload.code;
+        var email = payload.email;
+
+        if (typeof code !== 'string' && typeof email !== 'string') {
+          $log.warn('bad payload', payload.code);
+          return;
+        }
+
+        TsService.giveBeer();
+
+        ctrl.message = payload;
+      }
     };
 
     BeerDukeService.connect('tap');

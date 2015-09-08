@@ -13,6 +13,7 @@
     "tests"
   ],
   "dependencies": {
-    "angular-route": "~1.4.5"
+    "angular-route": "~1.4.5",
+    "lodash": "~3.10.1"
   }
 }

@@ -1,4 +1,4 @@
-<div ng-init="clientId = ctrl.settings.clientId(); showSettings = ctrl.settings.showSettings()">
+<div>
   <h2>Settings</h2>
 
   <p>
@@ -8,14 +8,21 @@
   <p>
     <label>
       showSettings
-      <input type="checkbox" ng-model="ctrl.showSettings">
+      <input type="checkbox" ng-model="ctrl.settings.showSettings">
     </label>
   </p>
 
   <p>
     <label>
       clientId
-      <input type="text" ng-model="ctrl.clientId">
+      <input type="text" ng-model="ctrl.settings.clientId">
+    </label>
+  </p>
+
+  <p>
+    <label>
+      TS
+      <input type="text" ng-model="ctrl.settings.tsUrl">
     </label>
   </p>
 
