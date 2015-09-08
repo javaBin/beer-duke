@@ -1,17 +1,18 @@
 (function () {
   'use strict';
 
-  function BeerDukeTapController($log, $timeout, BeerDukeService, BeerDukeSettings, TsService) {
+  function BeerDukeTapController($log, $timeout, $http, BeerDukeService, BeerDukeSettings, TsService) {
     var ctrl = this;
 
-    if(!BeerDukeSettings.values.clientId) {
+    var heros = [];
+
+    if (!BeerDukeSettings.values.clientId) {
       BeerDukeSettings.setRandomClientId();
     }
 
     var messages = ctrl.messages = [];
     ctrl.count = 0;
     ctrl.code = '';
-    rotateCode();
 
     function rotateCode() {
       ctrl.code = '' + ctrl.count++;
@@ -50,14 +51,24 @@
     };
 
     function onGiveBeerRequest(email, code) {
-      TsService.giveBeer().then(function(counts) {
+      TsService.giveBeer().then(function (counts) {
         BeerDukeService.updateSlots(counts);
       });
 
-      //ctrl.message = code;
+      var hero = _.find(heros, {email: email});
+
+      if (hero) {
+        ctrl.hero = hero;
+      } else {
+        ctrl.zero = email;
+      }
     }
 
     BeerDukeService.connect('tap');
+    rotateCode();
+    $http.get('sdkfjsdkljlsdkjg.json').then(function (res) {
+      heros = res.data;
+    })
   }
 
   function run(BeerDukeService) {

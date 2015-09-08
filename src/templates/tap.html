@@ -14,6 +14,16 @@
 		<span>The secret code</span>
 	  </div>
 
+	  <div class="code" ng-show="ctrl.hero">
+      <span>Last beer given to:</span>
+  		{{ctrl.hero.name}}<br>
+	  </div>
+
+	  <div class="code" ng-show="ctrl.zero">
+  		{{ctrl.zero}}<br>
+      <span>is a zero! Contact javaBin to become a HERO</span>
+	  </div>
+
 	  <ng-include src="'templates/footer.html'"></ng-include>
 
 	  <div ng-if="settings.showSettings">
