@@ -1,11 +1,26 @@
-<div>
-  Code: {{ctrl.code}}
+<div class="wrapper">
+	<img class="header" src="img/beer.png">
 
-  <ng-include src="'templates/footer.html'"></ng-include>
 
-  <div ng-if="settings.showSettings">
-    Messages:
-    <pre ng-repeat="m in ctrl.messages|limitTo:10">{{m}}</pre>
-  </div>
+	<div>
+		<div class="code-expl">
+			Go to beer.java.no<br>
+			Enter the code<br>
+			Select a beer<br>
+			Profit!
+		</div>
+	  <div class="code">
+		{{ctrl.code}}<br>
+		<span>The secret code</span>
+	  </div>
+
+	  <ng-include src="'templates/footer.html'"></ng-include>
+
+	  <div ng-if="settings.showSettings">
+	    Messages:
+	    <pre ng-repeat="m in ctrl.messages|limitTo:10">{{m}}</pre>
+	  </div>
+
+	</div>
 
 </div>

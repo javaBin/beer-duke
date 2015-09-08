@@ -2,3 +2,4 @@
 *.iml
 src/jspm_packages
 node_modules
+src/bower_components/*
