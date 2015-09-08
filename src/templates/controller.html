@@ -23,16 +23,16 @@
 
   <div class="separator"></div>
 
-  connected: {{mqtt.connected()}}
+  connected to beer counter: {{mqtt.connected()}}
 
   <div ng-if="true || ctrl.slots.length > 0">
-    Beers dispensed:
-    <div ng-repeat="(slot, count) in ctrl.slots">
-        #{{slot}} = {{count}}
+    <h2>Live beer count:</h2>
+    <div ng-repeat="(slot, count) in ctrl.slots" class="counter">
+        <span>slot #{{slot}}:</span> {{count}} beers
     </div>
   </div>
 
-
+  <div class="separator"></div>
 
   problems: {{mqtt.problems|json}}
 
