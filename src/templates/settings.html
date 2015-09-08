@@ -1,14 +1,22 @@
-<div>
+<div ng-init="clientId = ctrl.settings.clientId(); showSettings = ctrl.settings.showSettings()">
   <h2>Settings</h2>
-  <a href="#/">back</a>
-  <label>
-    showSettings
-    <input type="checkbox" ng-model="ctrl.settings.showSettings">
-  </label>
 
-  <label>
-    clientId
-    <input type="text" ng-model="ctrl.settings.clientId">
-  </label>
+  <p>
+    <button ng-click="ctrl.save()">back</button>
+  </p>
+
+  <p>
+    <label>
+      showSettings
+      <input type="checkbox" ng-model="ctrl.showSettings">
+    </label>
+  </p>
+
+  <p>
+    <label>
+      clientId
+      <input type="text" ng-model="ctrl.clientId">
+    </label>
+  </p>
 
 </div>

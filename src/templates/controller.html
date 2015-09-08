@@ -1,8 +1,12 @@
-<div ng-controller="MqttController as mqtt">
-  <div ng-controller="BeerDukeControllerController as ctrl">
+<div>
+  <div>
     <label>
       Code from tap:
       <input type="number" ng-model="ctrl.code">
+    </label>
+    <label>
+      Your email address
+      <input type="email" ng-model="ctrl.email">
     </label>
     <button ng-click="ctrl.requestBeer()">Request Beer!</button>
   </div>

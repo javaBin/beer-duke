@@ -1,46 +1,43 @@
-import angular from 'angular';
-import 'angular-route';
-import './BeerDuke.js';
+(function () {
+  'use strict';
 
-class BeerDukeControllerController {
-  constructor(BeerDukeService) {
-    this.BeerDukeService = BeerDukeService;
+  function BeerDukeControllerController($log, BeerDukeService, BeerDukeSettings) {
+    var ctrl = this;
 
-    this.BeerDukeService.connect('controller', {
-      onConnect: this.onConnect,
-      onMessageArrived: this.onMessageArrived
-    });
+    if (BeerDukeSettings.showSettings()) {
+      ctrl.code = 123;
+      ctrl.email = 'foo@example.org';
+    }
+
+    ctrl.requestBeer = function () {
+      var payload = {
+        code: this.code,
+        email: this.email
+      };
+      $log.info('payload', payload);
+
+      BeerDukeService.submit('/beer-duke', payload);
+    };
+
+    BeerDukeService.callbacks.onMessageArrived = function (m) {
+      ctrl.lastCode = m.code;
+    }
   }
 
-  requestBeer() {
-    let code = this.code;
-
-    console.log('code', code);
-    this.BeerDukeService.requestBeer(code);
+  function run(BeerDukeService) {
+    BeerDukeService.connect('controller');
   }
 
-  onConnect() {
-    console.log('onConnect');
+  function config($routeProvider) {
+    $routeProvider
+      .when('/', {
+        controller: BeerDukeControllerController,
+        controllerAs: 'ctrl',
+        templateUrl: 'templates/controller.html'
+      });
   }
 
-  onMessageArrived(msg) {
-    console.log('msg =', msg);
-  }
-}
-
-function run(BeerDukeService) {
-  //BeerDukeService.connect('controller');
-}
-
-function config($routeProvider) {
-  $routeProvider
-    .when('/', {
-      controller: BeerDukeControllerController,
-      controllerAs: 'ctrl',
-      templateUrl: 'templates/controller.html'
-    });
-}
-angular.module('BeerDukeController', ['ngRoute', 'BeerDuke'])
-  .run(run)
-  .config(config)
-  .controller('BeerDukeControllerController', BeerDukeControllerController);
+  angular.module('BeerDukeController', ['ngRoute', 'BeerDuke'])
+    .run(run)
+    .config(config);
+}());

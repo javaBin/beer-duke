@@ -1,166 +1,191 @@
-import angular from 'angular';
+(function () {
+  'use strict';
 
-class SettingsController {
-  constructor(BeerDukeSettings) {
-    this.settings = BeerDukeSettings;
-  }
-}
+  function SettingsController($log, $location, BeerDukeSettings) {
+    var ctrl = this;
 
-class BeerDukeSettings {
-  constructor() {
-    this.clientId = BeerDukeSettings.load('clientId') || 'beer-duke-' + Math.round(Math.random() * 100000);
-    console.log('this =', this);
-    this.showSettings = BeerDukeSettings.load('showSettings') == 'true' || false;
-  }
+    ctrl.clientId = BeerDukeSettings.clientId();
+    ctrl.showSettings = BeerDukeSettings.showSettings();
 
-  save() {
-    BeerDukeSettings.store('clientId', clientId);
-    BeerDukeSettings.store('showSettings', showSettings);
+    ctrl.save = function () {
+      BeerDukeSettings.clientId(ctrl.clientId);
+      BeerDukeSettings.showSettings(ctrl.showSettings);
+      BeerDukeSettings.save();
+
+      $location.path('/')
+    }
   }
 
-  static store(key, value) {
-    window.localStorage[key] = angular.toJson(value);
-    return value;
+  function BeerDukeSettings() {
+
+    function save() {
+      store('clientId', clientId_);
+      store('showSettings', showSettings_);
+    }
+
+    function store(key, value) {
+      window.localStorage[key] = angular.toJson(value);
+      return value;
+    }
+
+    function load(key) {
+      var x = window.localStorage[key];
+      if (typeof x === 'undefined') {
+        return x;
+      }
+
+      return angular.fromJson(x);
+    }
+
+    var clientId_ = load('clientId') || 'beer-duke-' + Math.round(Math.random() * 100000);
+    var showSettings_ = load('showSettings') || false;
+    save();
+
+    function clientId(x) {
+      if (x) {
+        clientId_ = x;
+      }
+      return clientId_;
+    }
+
+    function showSettings(x) {
+      if (x) {
+        showSettings_ = x;
+      }
+      return showSettings_;
+    }
+
+    return {
+      clientId: clientId,
+      showSettings: showSettings,
+      load: load,
+      save: save
+    }
   }
 
-  static load(key) {
-    let x = window.localStorage[key];
-    console.log('key =', key, 'x =', x);
-    return angular.fromJson(x);
-  }
-}
+  function BeerDukeService($log, $timeout, $rootScope, BeerDukeSettings) {
+    var self = this;
+    var connected_ = false;
+    var messages = [];
+    var callbacks = {};
 
-class BeerDukeService {
-  constructor($timeout, $rootScope, BeerDukeSettings) {
-    this.$timeout = $timeout;
-    this.$rootScope = $rootScope;
-
-    this.connected_ = false;
-    this.messages = [];
-  }
-
-  static xxx() {
-    return new BeerDukeSettings();
-  }
-
-  connect(type, opts) {
-    this.opts = opts || {};
-
-    console.log('BeerDukeSettings =', BeerDukeSettings);
-    let clientId = BeerDukeSettings.clientId + "-" + type;
-    console.log('clientId =', clientId);
-    let client = new Paho.MQTT.Client("wss://trygvis.io:9001/", clientId);
-    client.onConnectionLost = (a) => {
-      this.$timeout(() => {
-        this.$rootScope.$apply(() => {
-          this.onConnectionLost(a);
-        })
-      });
-    };
-    client.onMessageArrived = (a) => {
-      this.$timeout(() => {
-        this.$rootScope.$apply(() => {
-          this.onMessageArrived(a);
-        })
-      });
-    };
-
-    this.client = client;
-
-    this.client.connect({
-      onSuccess: () => {
-        this.$timeout(() => {
-          this.$rootScope.$apply(() => {
-            this.onConnect();
+    function connect(type) {
+      var clientId = BeerDukeSettings.clientId() + "-" + type;
+      var client = new Paho.MQTT.Client("wss://trygvis.io:9001/", clientId);
+      client.onConnectionLost = function (a) {
+        $timeout(function () {
+          $rootScope.$apply(function () {
+            onConnectionLost(a);
           })
         });
+      };
+      client.onMessageArrived = function () {
+        var args = arguments;
+        $timeout(function () {
+          $rootScope.$apply(function () {
+            onMessageArrived.apply(self, args);
+          })
+        });
+      };
+
+      self.client = client;
+
+      self.client.connect({
+        onSuccess: function () {
+          var args = arguments;
+          $timeout(function () {
+            $rootScope.$apply(function () {
+              onConnect.apply(self, args);
+            })
+          });
+        }
+      });
+    }
+
+    function subscribe(name) {
+      return self.client.subscribe(name);
+    }
+
+    function connected() {
+      return self.connected_;
+    }
+
+    function onConnect() {
+      $log.info('Connected');
+
+      self.connected_ = true;
+
+      invoke('onConnect');
+    }
+
+    function invoke(name, args) {
+      var fn = callbacks[name];
+
+      if (typeof fn === 'function') {
+        try {
+          return fn.apply(undefined, args);
+        } catch (e) {
+          $log.warn('exception calling ' + name, e);
+        }
       }
-    });
-  }
+    }
 
-  get connected() {
-    return this.connected_;
-  }
+    function onConnectionLost(responseObject) {
+      self.connected_ = false;
 
-  onConnect() {
-    console.log('Connected');
+      //if (responseObject.errorCode !== 0)
+      $log.warn("onConnectionLost:", responseObject);
+      $log.warn("onConnectionLost:", responseObject.errorMessage);
+    }
 
-    this.connected_ = true;
-
-    if (this.opts.onConnect) {
+    function onMessageArrived(message) {
+      messages.push(message);
       try {
-        this.opts.onConnect();
+        var m = angular.fromJson(message);
+        invoke('onMessageArrived', [m]);
       } catch (e) {
+        $log.warn('could not parse json', e);
       }
     }
 
-    //this.client.subscribe("/beer-duke");
-  }
+    function submit(destination, payload) {
+      var message = new Paho.MQTT.Message(angular.toJson(payload));
+      message.destinationName = destination;
+      self.client.send(message);
+    }
 
-  onConnectionLost(responseObject) {
-    this.connected_ = false;
-
-    //if (responseObject.errorCode !== 0)
-    console.log("onConnectionLost:", responseObject);
-    console.log("onConnectionLost:", responseObject.errorMessage);
-  }
-
-  onMessageArrived(message) {
-    console.log("onMessageArrived:" + message.payloadString);
-
-    this.messages.push(message);
-
-    if (this.opts.onMessageArrived) {
-      try {
-        let m = angular.fromJson(message);
-        this.opts.onMessageArrived(m);
-      } catch (e) {
-      }
+    return {
+      messages: messages,
+      submit: submit,
+      connect: connect,
+      subscribe: subscribe,
+      connected: connected,
+      callbacks: callbacks
     }
   }
 
-  requestBeer(code) {
-    let message = new Paho.MQTT.Message(angular.toJson({code: code}));
-    message.destinationName = "/beer-duke";
-    this.client.send(message);
+  function config($routeProvider) {
+    $routeProvider
+      .when('/settings', {
+        controller: SettingsController,
+        controllerAs: 'ctrl',
+        templateUrl: 'templates/settings.html'
+      })
+      .otherwise({
+        redirectTo: '/'
+      })
   }
-}
 
-class MqttController {
-  constructor(BeerDukeService) {
-    this.BeerDukeService = BeerDukeService;
-  }
-
-  get connected() {
-    return this.BeerDukeService.connected;
-  }
-}
-
-function config($routeProvider) {
-  console.log('BeerDuke: config');
-  $routeProvider
-    .when('/settings', {
-      controller: SettingsController,
-      controllerAs: 'ctrl',
-      templateUrl: 'templates/settings.html'
-    })
-    .otherwise({
-      redirectTo: '/'
-    })
-}
-
-function run($rootScope, BeerDukeSettings, BeerDukeService) {
-  $rootScope.settings = BeerDukeSettings;
-  $rootScope.mqtt = {
-    get connected() {
-      return BeerDukeService.connected
+  function run($rootScope, BeerDukeSettings, BeerDukeService) {
+    $rootScope.settings = BeerDukeSettings;
+    $rootScope.mqtt = {
+      connected: BeerDukeService.connected
     }
-  };
-}
+  }
 
-angular.module('BeerDuke', ['ngRoute'])
-  .controller('MqttController', MqttController)
-  .service('BeerDukeService', BeerDukeService)
-  .factory('BeerDukeSettings', () => new BeerDukeSettings())
-  .config(config)
-  .run(run);
+  angular.module('BeerDuke', ['ngRoute'])
+    .factory('BeerDukeService', BeerDukeService)
+    .factory('BeerDukeSettings', BeerDukeSettings)
+    .config(config)
+    .run(run);
+}());

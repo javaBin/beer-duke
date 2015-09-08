@@ -6,21 +6,6 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "jspm": "^0.16.0",
-    "jspm-git": "^0.3.3"
-  },
-  "jspm": {
-    "directories": {
-      "baseURL": "src"
-    },
-    "dependencies": {
-      "angular": "npm:angular@^1.4.5",
-      "angular-route": "npm:angular-route@^1.4.5"
-    },
-    "devDependencies": {
-      "core-js": "npm:core-js@^1.1.0",
-      "traceur": "github:jmcriffey/bower-traceur@0.0.91",
-      "traceur-runtime": "github:jmcriffey/bower-traceur-runtime@0.0.91"
-    }
+    "bower": "^1.5.2"
   }
 }

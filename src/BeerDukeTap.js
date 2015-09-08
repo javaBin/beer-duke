@@ -1,45 +1,54 @@
-import angular from 'angular';
-import 'angular-route';
-import './BeerDuke.js';
+(function () {
+  'use strict';
 
-class BeerDukeTapController {
-  constructor($timeout, BeerDukeSettings) {
-    console.log('BeerDukeTapController', this);
+  function BeerDukeTapController($log, $timeout, BeerDukeService) {
+    var ctrl = this;
 
-    this.$timeout = $timeout;
-    this.settings = BeerDukeSettings;
+    rotateCode();
+    self.count = 0;
+    self.code = '';
 
-    this.rotateCode();
-    this.count = 0;
-    this.code = '';
+    function rotateCode() {
+      self.code = '' + self.count++;
+      $timeout(function () {
+        rotateCode();
+      }, 1000);
+    }
+
+    BeerDukeService.callbacks.onConnect = function () {
+      BeerDukeService.subscribe('/beer-duke');
+    };
+    BeerDukeService.callbacks.onMessageArrived = function (m) {
+      $log.info('m.payloadString =', m.payloadString);
+      var payload = angular.fromJson(m.payloadString);
+
+      var code = payload.code;
+      var email = payload.email;
+
+      if (typeof code !== 'string' && typeof email !== 'string') {
+        $log.warn('bad payload', payload.code);
+        return;
+      }
+
+      ctrl.message = payload;
+    };
+
+    BeerDukeService.connect('tap');
   }
-   
-  rotateCode() {
-    this.code = '' + this.count++;
-    this.$timeout(() => {
-      this.rotateCode();
-    }, 1000);
+
+  function run(BeerDukeService) {
   }
-}
 
-class TapSettingsController {
-  constructor() {
+  function config($routeProvider) {
+    $routeProvider
+      .when('/', {
+        controller: BeerDukeTapController,
+        controllerAs: 'ctrl',
+        templateUrl: 'templates/tap.html'
+      });
   }
-}
 
-function run(BeerDukeService) {
-  BeerDukeService.connect('tap');
-}
-
-function config($routeProvider) {
-  $routeProvider
-    .when('/', {
-      controller: BeerDukeTapController,
-      controllerAs: 'ctrl',
-      templateUrl: 'templates/tap.html'
-    });
-}
-
-angular.module('BeerDukeTap', ['BeerDuke', 'ngRoute'])
-  .run(run)
-  .config(config);
+  angular.module('BeerDukeTap', ['BeerDuke', 'ngRoute'])
+    .run(run)
+    .config(config);
+}());
