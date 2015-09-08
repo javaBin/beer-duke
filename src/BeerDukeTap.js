@@ -14,6 +14,7 @@
     ctrl.count = 0;
     ctrl.code = '';
     var codes = [];
+    var timerHandle;
 
     function rotateCode(clearCodes) {
       if (clearCodes) {
@@ -25,7 +26,10 @@
       if (codes.length > 2) {
         codes = codes.slice(1);
       }
-      $timeout(function () {
+      if (timerHandle) {
+        $timeout.cancel(timerHandle);
+      }
+      timerHandle = $timeout(function () {
         rotateCode(false);
       }, 60 * 1000);
     }
