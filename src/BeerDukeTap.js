@@ -13,12 +13,20 @@
     var messages = ctrl.messages = [];
     ctrl.count = 0;
     ctrl.code = '';
+    ctrl.codes = [];
+
+    function randomDigit() {
+      return '' + (Math.round(Math.random() * 9) + 1);
+    }
 
     function rotateCode() {
-      ctrl.code = '' + ctrl.count++;
+      var c = randomDigit() + randomDigit() + randomDigit() + randomDigit() + randomDigit();
+      ctrl.code = c;
+      ctrl.codes.push(c);
+      ctrl.codes = ctrl.codes.slice(1);
       $timeout(function () {
         rotateCode();
-      }, 1000);
+      }, 60 * 1000);
     }
 
     BeerDukeService.callbacks.onConnect = function () {
@@ -62,6 +70,8 @@
       } else {
         ctrl.zero = email;
       }
+
+      rotateCode();
     }
 
     BeerDukeService.connect('tap');
