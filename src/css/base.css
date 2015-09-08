@@ -37,6 +37,14 @@ html {
 	font-weight: bold;
 }
 
+.code-no {
+	background: rgb(159, 7 55);
+}
+
+.code-yes {
+	background: rgb(43, 106, 101);
+}
+
 
 .form-element {
 	font-size: 18px;
