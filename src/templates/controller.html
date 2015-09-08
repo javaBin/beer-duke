@@ -4,12 +4,13 @@
   <div>
     <label>
       <div class="form-element">
-	Enter the current secret code
-	</div>
-	<div class="form-element">
-	  <input type="number" placeholder="Secret…" ng-model="ctrl.code" min="10000" max="99999" required>
-	</div>
+        Enter the current secret code
+      </div>
+      <div class="form-element">
+        <input type="number" placeholder="Secret…" ng-model="ctrl.code" min="10000" max="99999" required>
+      </div>
     </label>
+
     <div class="form-element">
       <button ng-disabled="form.$invalid" ng-click="ctrl.requestBeer()">Request Beer!</button>
     </div>
@@ -17,19 +18,42 @@
 
   <div class="separator"></div>
 
-   <div class="form-element">
+  <div class="form-element">
     <button type="button" ng-click="ctrl.logOut()">Disconnect</button>
   </div>
 
-  <div class="separator"></div>
+  <p>
+    Connected to beer counter: {{mqtt.connected()}}
+  </p>
 
-  connected to beer counter: {{mqtt.connected()}}
+  <section ng-if="ctrl.last">
+    <div class="separator"></div>
+
+    <h2>Last Event</h2>
+
+    <p ng-if="ctrl.last.badCode">
+      {{ctrl.last.hero.name || ctrl.last.zero}}<br>
+      <span>…can't type, n00b!</span>
+    </p>
+
+    <p ng-if="!ctrl.last.badCode && ctrl.last.hero">
+      {{ctrl.last.hero.name}}<br>
+      <span>Got the previous beer<br>A real javaBin HERO!</span>
+    </p>
+
+    <p ng-if="!ctrl.last.badCode && ctrl.last.zero">
+      {{ctrl.last.zero}}
+      <span>…got no beer :/<br>Contact javaBin to become a HERO</span>
+    </p>
+  </section>
+  <div class="separator"></div>
 
   <div ng-if="true || ctrl.slots.length > 0">
     <h2>Live beer count:</h2>
-    <div ng-repeat="(slot, count) in ctrl.slots" class="counter">
-        <span>slot #{{slot}}:</span> {{count}} beers
-    </div>
+
+    <p ng-repeat="(slot, count) in ctrl.slots" class="counter">
+      <span>slot[{{slot}}] = </span> Beers({{count}})
+    </p>
   </div>
 
   <div class="separator"></div>

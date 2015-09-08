@@ -13,6 +13,7 @@
 
     BeerDukeService.callbacks.onConnect = function () {
       BeerDukeService.subscribe(BeerDukeSettings.values.tap + '/slots');
+      BeerDukeService.subscribe(BeerDukeSettings.values.tap + '/last-beer');
     };
     BeerDukeService.callbacks.onMessageArrived = function (m) {
       $log.info('m.payloadString =', m.payloadString);
@@ -28,6 +29,13 @@
               ctrl.slots[index] = count;
             });
           }
+        } catch (e) {
+          $log.warn(e);
+        }
+      } else if (m.destinationName == BeerDukeSettings.values.tap + '/last-beer') {
+        try {
+          var last = angular.fromJson(m.payloadString);
+          ctrl.last = last;
         } catch (e) {
           $log.warn(e);
         }

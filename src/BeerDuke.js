@@ -163,6 +163,14 @@
       self.client.send(message);
     }
 
+    function updateLastBeer(payload) {
+      var message = new Paho.MQTT.Message(angular.toJson(payload));
+      message.destinationName = BeerDukeSettings.values.tap + '/last-beer';
+      message.qos = 0;
+      message.retained = true;
+      self.client.send(message);
+    }
+
     return {
       messages: messages,
       connect: connect,
@@ -171,6 +179,7 @@
       callbacks: callbacks,
       updateSlots: updateSlots,
       requestBeer: requestBeer,
+      updateLastBeer: updateLastBeer,
       problems: problems
     }
   }

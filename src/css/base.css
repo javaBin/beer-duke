@@ -48,6 +48,13 @@ html {
 	background: rgba(43, 106, 101, 1);
 }
 
+h2 {
+  text-align: center;
+}
+
+p {
+	text-align: center;
+}
 
 .form-element {
 	font-size: 18px;

@@ -76,12 +76,15 @@
         ctrl.hero = hero;
         TsService.giveBeer().then(function (counts) {
           BeerDukeService.updateSlots(counts);
+          BeerDukeService.updateLastBeer({hero});
         });
       } else if (hero && !validCode) {
         ctrl.hero = hero;
         ctrl.badCode = true;
+        BeerDukeService.updateLastBeer({hero, badCode: true});
       } else {
         ctrl.zero = email;
+        BeerDukeService.updateLastBeer({zero: email});
       }
 
       rotateCode(true);
