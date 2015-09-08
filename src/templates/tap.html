@@ -15,14 +15,16 @@
 	  </div>
 
 	  <div class="code" ng-show="ctrl.hero">
-      <span>Last beer given to:</span>
   		{{ctrl.hero.name}}<br>
+  		<span>Got the previous beer<br>A real javaBin HERO!</span>
 	  </div>
 
 	  <div class="code" ng-show="ctrl.zero">
   		{{ctrl.zero}}<br>
-      <span>is a zero! Contact javaBin to become a HERO</span>
+      <span>…got no beer :/<br>Contact javaBin to become a HERO</span>
 	  </div>
+
+	  <div class="separator"></div>
 
 	  <ng-include src="'templates/footer.html'"></ng-include>
 
