@@ -1,11 +1,27 @@
 <div>
+  <img class="header" src="img/beer3.png">
+
   <div>
     <label>
-      Code from tap:
-      <input type="number" ng-model="ctrl.code">
+      <div class="form-element">
+	Code from tap:
+	</div>
+	<div class="form-element">
+	  <input type="number" ng-model="ctrl.code">
+	</div>
     </label>
-    <button ng-click="ctrl.requestBeer()">Request Beer!</button>
+    <div class="form-element">
+      <button ng-click="ctrl.requestBeer()">Request Beer!</button>
+    </div>
   </div>
+
+  <div class="separator"></div>
+
+   <div class="form-element">
+    <button type="button" ng-click="ctrl.logOut()">Disconnect</button>
+  </div>
+
+  <div class="separator"></div>
 
   connected: {{mqtt.connected()}}
 
@@ -16,7 +32,7 @@
     </div>
   </div>
 
-  <button type="button" ng-click="ctrl.logOut()">Disconnect</button><br/>
+
 
   problems: {{mqtt.problems|json}}
 

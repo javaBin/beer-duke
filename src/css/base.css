@@ -43,7 +43,7 @@ html {
 	padding: 10px 0;
 	text-align: center;
 }
-.form-element input {
+.form-element input, .form-element button {
 	width: 100%;
 	font-size: 20px;
 	padding: 10px;
